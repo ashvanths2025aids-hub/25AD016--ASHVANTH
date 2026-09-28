@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BloodLink - Donation History</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        header {
+            background: #b71c1c;
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            margin: 35px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            color: #b71c1c;
+            margin-top: 0;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 13px 20px;
+            background: #b71c1c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #8e0000;
+        }
+
+        .all-button {
+            background: #555;
+        }
+
+        .all-button:hover {
+            background: #333;
+        }
+
+        #message {
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #b71c1c;
+            color: white;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+        }
+
+        .buttons {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .link-button {
+            text-decoration: none;
+            background: #b71c1c;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+
+        .link-button:hover {
+            background: #8e0000;
+        }
+
+        .secondary {
+            background: #555;
+        }
+
+        .secondary:hover {
+            background: #333;
+        }
+
+        @media (max-width: 650px) {
+
+            .container {
+                width: 95%;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🩸 BloodLink</h1>
+    <p>Blood Donor Management System</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Donation History</h2>
+
+        <p class="subtitle">
+            View all recorded blood donations
+        </p>
+
+        <div class="search-box">
+
+            <input
+                    type="number"
+                    id="donorId"
+                    placeholder="Enter Donor ID"
+            >
+
+            <button type="button" onclick="searchDonations()">
+                Search
+            </button>
+
+            <button
+                    type="button"
+                    class="all-button"
+                    onclick="loadAllDonations()"
+            >
+                View All
+            </button>
+
+        </div>
+
+        <div id="message">
+            Loading donation records...
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                <tr>
+                    <th>Donation ID</th>
+                    <th>Donor ID</th>
+                    <th>Donation Date</th>
+                    <th>Hospital</th>
+                    <th>City</th>
+                </tr>
+                </thead>
+
+                <tbody id="donationTable">
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="buttons">
+
+            <a
+                    class="link-button"
+                    href="donation.html"
+            >
+                + Record Donation
+            </a>
+
+            <a
+                    class="link-button"
+                    href="dashboard.html"
+            >
+                ← Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    async function loadAllDonations() {
+
+        const message =
+            document.getElementById("message");
+
+        const table =
+            document.getElementById("donationTable");
+
+        message.innerText =
+            "Loading donation records...";
+
+        table.innerHTML = "";
+
+        try {
+
+            const response =
+                await fetch("/api/donations");
+
+            if (!response.ok) {
+                throw new Error("Failed to load donations");
+            }
+
+            const donations =
+                await response.json();
+
+            displayDonations(donations);
+
+        } catch (error) {
+
+            message.innerText =
+                "Unable to load donation records.";
+
+        }
+    }
+
+
+    async function searchDonations() {
+
+        const donorId =
+            document.getElementById("donorId").value.trim();
+
+        const message =
+            document.getElementById("message");
+
+        const table =
+            document.getElementById("donationTable");
+
+        if (donorId === "") {
+
+            message.innerText =
+                "Please enter a Donor ID.";
+
+            message.style.color = "red";
+
+            return;
+        }
+
+        message.innerText =
+            "Searching...";
+
+        message.style.color = "#b71c1c";
+
+        table.innerHTML = "";
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/donations/donor/" + donorId
+                );
+
+            if (!response.ok) {
+                throw new Error("Search failed");
+            }
+
+            const donations =
+                await response.json();
+
+            displayDonations(donations);
+
+        } catch (error) {
+
+            message.innerText =
+                "Unable to search donation records.";
+
+            message.style.color = "red";
+        }
+    }
+
+
+    function displayDonations(donations) {
+
+        const table =
+            document.getElementById("donationTable");
+
+        const message =
+            document.getElementById("message");
+
+        table.innerHTML = "";
+
+        if (donations.length === 0) {
+
+            message.innerText =
+                "No donation records found.";
+
+            message.style.color = "#777";
+
+            const row =
+                document.createElement("tr");
+
+            row.innerHTML =
+                '<td colspan="5" class="empty">' +
+                'No donation records available' +
+                '</td>';
+
+            table.appendChild(row);
+
+            return;
+        }
+
+        message.innerText =
+            donations.length +
+            " donation record(s) found.";
+
+        message.style.color = "green";
+
+        donations.forEach(function(donation) {
+
+            const row =
+                document.createElement("tr");
+
+            row.innerHTML =
+                "<td>" +
+                donation.id +
+                "</td>" +
+
+                "<td>" +
+                donation.donorId +
+                "</td>" +
+
+                "<td>" +
+                donation.donationDate +
+                "</td>" +
+
+                "<td>" +
+                donation.hospitalName +
+                "</td>" +
+
+                "<td>" +
+                donation.city +
+                "</td>";
+
+            table.appendChild(row);
+
+        });
+    }
+
+
+    loadAllDonations();
+
+</script>
+
+</body>
+
+</html>

@@ -4,41 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard - BloodLink</title>
+    <title>BloodLink - Dashboard</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            background: #f4f6f8;
+            color: #333;
         }
 
         header {
             background: #b71c1c;
             color: white;
-            padding: 20px;
-            text-align: center;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
         }
 
         .container {
-            width: 90%;
+            width: 92%;
+            max-width: 1100px;
             margin: 30px auto;
         }
 
-        h2 {
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            margin-bottom: 5px;
             color: #b71c1c;
+        }
+
+        .welcome p {
+            color: #666;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            margin: 0;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #b71c1c;
+            margin-top: 10px;
+        }
+
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        .table-box h2 {
+            color: #b71c1c;
+            margin-top: 0;
         }
 
         table {
             width: 100%;
-            background: white;
             border-collapse: collapse;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
 
         th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
             text-align: center;
         }
 
@@ -47,11 +112,67 @@
             color: white;
         }
 
-        .back {
-            display: inline-block;
-            margin-top: 20px;
-            color: #b71c1c;
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .available {
+            color: green;
+            font-weight: bold;
+        }
+
+        .not-available {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        #message {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .buttons {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button {
             text-decoration: none;
+            background: #b71c1c;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+
+        .button:hover {
+            background: #8e0000;
+        }
+
+        .secondary {
+            background: #555;
+        }
+
+        .secondary:hover {
+            background: #333;
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 95%;
+            }
         }
     </style>
 </head>
@@ -59,33 +180,84 @@
 <body>
 
 <header>
-    <h1>BloodLink</h1>
-    <p>Donor Dashboard</p>
+    <div>
+        <h1>🩸 BloodLink</h1>
+        <p>Blood Donor Management System</p>
+    </div>
 </header>
 
 <div class="container">
 
-    <h2>Registered Donors</h2>
+    <div class="welcome">
+        <h2>Dashboard</h2>
+        <p>Manage and view registered blood donors.</p>
+    </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Blood Group</th>
-            <th>City</th>
-            <th>Available</th>
-        </tr>
-        </thead>
+    <div class="cards">
 
-        <tbody id="donorTable">
-        </tbody>
-    </table>
+        <div class="card">
+            <h3>Total Donors</h3>
+            <div class="number" id="totalDonors">0</div>
+        </div>
 
-    <a class="back" href="index.html">
-        ← Back to Home
-    </a>
+        <div class="card">
+            <h3>Available Donors</h3>
+            <div class="number" id="availableDonors">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Unavailable Donors</h3>
+            <div class="number" id="unavailableDonors">0</div>
+        </div>
+
+    </div>
+
+    <div class="table-box">
+
+        <h2>Registered Donors</h2>
+
+        <div id="message">
+            Loading donors...
+        </div>
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Blood Group</th>
+                <th>City</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+            <tbody id="donorTable"></tbody>
+
+        </table>
+
+        <div class="buttons">
+
+            <a class="button" href="donor.html">
+                + Register Donor
+            </a>
+
+            <a class="button" href="search.html">
+                🔎 Find Donor
+            </a>
+
+            <a class="button" href="donation.html">
+                🩸 Record Donation
+            </a>
+
+            <a class="button secondary" href="index.html">
+                ← Home
+            </a>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -97,18 +269,78 @@
 
             const response = await fetch("/api/donors");
 
+            if (!response.ok) {
+                throw new Error("Failed to load donors");
+            }
+
             const donors = await response.json();
 
             const table = document.getElementById("donorTable");
 
             table.innerHTML = "";
 
+            let availableCount = 0;
+            let unavailableCount = 0;
+
             donors.forEach(function(donor) {
+
+                if (donor.available) {
+                    availableCount++;
+                } else {
+                    unavailableCount++;
+                }
 
                 const row = document.createElement("tr");
 
-                row.innerHTML = `
-                <td>${donor.id}</td>
-                <td>${donor.name}</td>
-                <td>${donor.phone}</td>
-                <td>${
+                const status = donor.available
+                    ? '<span class="available">Available</span>'
+                    : '<span class="not-available">Not Available</span>';
+
+                row.innerHTML =
+                    "<td>" + donor.id + "</td>" +
+                    "<td>" + donor.name + "</td>" +
+                    "<td>" + donor.phone + "</td>" +
+                    "<td>" + donor.bloodGroup + "</td>" +
+                    "<td>" + donor.city + "</td>" +
+                    "<td>" + status + "</td>";
+
+                table.appendChild(row);
+
+            });
+
+            document.getElementById("totalDonors").innerText =
+                donors.length;
+
+            document.getElementById("availableDonors").innerText =
+                availableCount;
+
+            document.getElementById("unavailableDonors").innerText =
+                unavailableCount;
+
+            if (donors.length === 0) {
+
+                document.getElementById("message").innerText =
+                    "No donors registered yet.";
+
+            } else {
+
+                document.getElementById("message").innerText =
+                    donors.length + " donor(s) registered.";
+
+            }
+
+        } catch (error) {
+
+            document.getElementById("message").innerText =
+                "Unable to load donors. Please check the server.";
+
+        }
+
+    }
+
+    loadDonors();
+
+</script>
+
+</body>
+</html>

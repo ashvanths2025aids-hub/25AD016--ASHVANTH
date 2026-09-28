@@ -1,5 +1,6 @@
 package com.bloodlink.project.Service;
 
+import com.bloodlink.project.Exception.DonorCooldownException;
 import com.bloodlink.project.Exception.ResourceNotFoundException;
 import com.bloodlink.project.Model.DonationRecord;
 import com.bloodlink.project.Model.Donor;
@@ -33,8 +34,25 @@ public class DonationRecordService {
                                         + record.getDonorId()
                         ));
 
+        // Check 90-day donation cooldown
+        if (donor.getLastDonationDate() != null) {
+
+            LocalDate nextAvailableDate =
+                    donor.getLastDonationDate().plusDays(90);
+
+            if (LocalDate.now().isBefore(nextAvailableDate)) {
+
+                throw new DonorCooldownException(
+                        "Donor is not available for donation until "
+                                + nextAvailableDate
+                );
+            }
+        }
+
+        // Record today's donation
         record.setDonationDate(LocalDate.now());
 
+        // Update donor status
         donor.setLastDonationDate(record.getDonationDate());
         donor.setAvailable(false);
 
@@ -47,9 +65,7 @@ public class DonationRecordService {
         return donationRecordRepository.findAll();
     }
 
-    public List<DonationRecord> getDonationsByDonor(
-            Long donorId) {
-
+    public List<DonationRecord> getDonationsByDonor(Long donorId) {
         return donationRecordRepository.findByDonorId(donorId);
     }
 
