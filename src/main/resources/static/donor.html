@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Register Donor - BloodLink</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: #b71c1c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            color: #b71c1c;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 12px;
+            background: #b71c1c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #8e0000;
+        }
+
+        #message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #b71c1c;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>BloodLink</h1>
+    <p>Donor Registration</p>
+</header>
+
+<div class="container">
+
+    <h2>Register New Donor</h2>
+
+    <form id="donorForm">
+
+        <label>Name</label>
+        <input type="text" id="name" required>
+
+        <label>Phone</label>
+        <input type="text" id="phone" required>
+
+        <label>Blood Group</label>
+        <input type="text" id="bloodGroup"
+               placeholder="Example: O+"
+               required>
+
+        <label>City</label>
+        <input type="text" id="city" required>
+
+        <label>Last Donation Date</label>
+        <input type="date" id="lastDonationDate">
+
+        <button type="submit">
+            Register Donor
+        </button>
+
+    </form>
+
+    <div id="message"></div>
+
+    <a class="back" href="index.html">
+        ← Back to Home
+    </a>
+
+</div>
+
+<script>
+
+    document.getElementById("donorForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const donor = {
+                name: document.getElementById("name").value,
+                phone: document.getElementById("phone").value,
+                bloodGroup: document.getElementById("bloodGroup").value,
+                city: document.getElementById("city").value,
+                lastDonationDate:
+                    document.getElementById("lastDonationDate").value || null,
+                available: true
+            };
+
+            try {
+
+                const response = await fetch("/api/donors", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(donor)
+                });
+
+                if (response.ok) {
+
+                    document.getElementById("message").innerText =
+                        "Donor registered successfully!";
+
+                    document.getElementById("donorForm").reset();
+
+                } else {
+
+                    document.getElementById("message").innerText =
+                        "Failed to register donor.";
+
+                }
+
+            } catch (error) {
+
+                document.getElementById("message").innerText =
+                    "Server connection error.";
+
+            }
+
+        });
+
+</script>
+
+</body>
+</html>
